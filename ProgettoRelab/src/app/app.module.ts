@@ -9,7 +9,7 @@ import {HttpClientModule} from '@angular/common/http'; // <---
   ],
   imports: [
     BrowserModule,
-    AgmCoreModule.forRoot({apiKey: 'TUA_API_KEY'}), // <---
+    AgmCoreModule.forRoot({apiKey: 'AIzaSyD8L7WADXvrlPR22aTJE_4_z1QbmdC30JQ'}), // <---
     HttpClientModule // <---
   ],
   providers: [],

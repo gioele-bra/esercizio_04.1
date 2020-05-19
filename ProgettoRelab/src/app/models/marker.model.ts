@@ -14,5 +14,45 @@ export class Marker {
             this.icon = { url: './assets/img/electricity.ico' };
              this.label = "";
         }
+        if(this.label.includes("Gasolio"))
+        {
+            this.icon = { url: './assets/img/oil.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("Teleriscaldamento"))
+        {
+            this.icon = { url: './assets/img/teleriscaldamento.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("GPL"))
+        {
+            this.icon = { url: './assets/img/lpg.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("NULL"))
+        {
+            this.icon = { url: './assets/img/question.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("Biomasse solide"))
+        {
+            this.icon = { url: './assets/img/biomass.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("RSU"))
+        {
+            this.icon = { url: './assets/img/rsu.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("Biomasse liquide"))
+        {
+            this.icon = { url: './assets/img/biomass2.ico' };
+             this.label = "";
+        }
+        if(this.label.includes("Olio combustibile"))
+        {
+            this.icon = { url: './assets/img/combOil.ico' };
+             this.label = "";
+        }
     }
 }
