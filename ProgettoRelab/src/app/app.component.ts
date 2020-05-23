@@ -36,8 +36,21 @@ export class AppComponent implements OnInit {
     console.log(data); //Verifica di ricevere i vettori energetici
     this.markers = []; //NB: markers va dichiarata tra le proprietà markers : Marker[]
     for (const iterator of data) { //Per ogni oggetto del vettore creoa un Marker
+      let latTot = 0; //Uso queste due variabili per calcolare latitudine e longitudine media
+    let lngTot = 0; //E centrare la mappa
+
+    console.log(data);
+    this.markers = [];
+
+    for (const iterator of data) {
       let m = new Marker(iterator.WGS84_X,iterator.WGS84_Y,iterator.CI_VETTORE);
+      latTot += m.lat; //Sommo tutte le latitutidini e longitudini
+      lngTot += m.lng;
       this.markers.push(m);
+    }
+    this.lng = lngTot/data.length; //Commenta qui
+    this.lat = latTot/data.length;
+    this.zoom = 16;
     }
  }
 
@@ -47,6 +60,16 @@ export class AppComponent implements OnInit {
     //Effettua la chiamatata al server per ottenere l’elenco dei vettori energetici
     this.obsCiVett = this.http.get<Ci_vettore[]>("https://3000-b5234404-990e-49ae-a442-0feb58cb83d5.ws-eu01.gitpod.io/ci_vettore/89");
     this.obsCiVett.subscribe(this.prepareCiVettData);
+  }
+
+  //Questo metodo richiama la route sul server che recupera il foglio specificato nella casella di testo
+  cambiaFoglio(foglio) : boolean
+  {
+    let val = foglio.value; //Commenta qui
+    this.obsCiVett = this.http.get<Ci_vettore[]>(`TUO_URL/ci_vettore/${val}`);  //Commenta qui
+    this.obsCiVett.subscribe(this.prepareCiVettData); //Commenta qui
+    console.log(val);
+    return false;
   }
 
   styleFunc = (feature) => {
