@@ -7,6 +7,9 @@ export class Marker {
    //l’etichetta
     constructor(public lat: number, public lng: number, public label?: string)
     {
+        if (this.label == null) {
+          return;
+        }
         if (this.label.includes("Gas")) {
             this.icon = new Icon ( './assets/img/gas.ico', 24 );
              this.label = "";

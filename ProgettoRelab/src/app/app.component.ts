@@ -26,13 +26,51 @@ export class AppComponent implements OnInit {
   circleLng: number = 0;
   maxRadius: number = 400; //Voglio evitare raggi troppo grossi
   radius : number = this.maxRadius; //Memorizzo il raggio del cerchio
+  shown : boolean = false;
+
+  serverUrl : string = "https://3000-e1529b1e-4307-4a51-a331-528de2b6b860.ws-eu01.gitpod.io";
+
+ /* //Mappa rosso-verde
+avgColorMap = (media) =>
+  {
+    if(media <= 36) return "#00FF00";
+    if(36 < media && media <= 40) return "#33ff00";
+    if(40 < media && media <= 58) return "#66ff00";
+    if(58 < media && media <= 70) return "#99ff00";
+    if(70 < media && media <= 84) return "#ccff00";
+    if(84 < media && media <= 100) return "#FFFF00";
+    if(100 < media && media <= 116) return "#FFCC00";
+    if(116 < media && media <= 1032) return "#ff9900";
+    if(1032 < media && media <= 1068) return "#ff6600";
+    if(1068 < media && media <= 1948) return "#FF3300";
+    if(1948 < media && media <= 3780) return "#FF0000";
+    return "#FF0000"
+  } */
+  //mappa scala di verdi
+  avgColorMapGreen = (media) =>
+  {
+    if(media <= 36) return "#EBECDF";
+    if(36 < media && media <= 40) return "#DADFC9";
+    if(40 < media && media <= 58) return "#C5D2B4";
+    if(58 < media && media <= 70) return "#ADC49F";
+    if(75 < media && media <= 84) return "#93B68B";
+    if(84 < media && media <= 100) return "#77A876";
+    if(100 < media && media <= 116) return "#629A6C";
+    if(116 < media && media <= 1032) return "#558869";
+    if(1032 < media && media <= 1068) return "#487563";
+    if(1068 < media && media <= 1948) return "#3B625B";
+    if(1948 < media && media <= 3780) return "#2F4E4F";
+    return "#003000" //Quasi nero
+  }
+
+
 
   constructor(public http: HttpClient) {
   }
 
   prepareData = (data: GeoFeatureCollection) => {
     this.geoJsonObject = data
-    console.log(this.geoJsonObject)
+    console.log(this.geoJsonObject);
   }
 
   //Metodo che riceve i dati e li aggiunge ai marker
@@ -43,8 +81,6 @@ export class AppComponent implements OnInit {
     for (const iterator of data) { //Per ogni oggetto del vettore creoa un Marker
       let latTot = 0; //Uso queste due variabili per calcolare latitudine e longitudine media
     let lngTot = 0; //E centrare la mappa
-
-    console.log(data);
     this.markers = [];
 
     for (const iterator of data) {
@@ -68,7 +104,7 @@ export class AppComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.obsGeoData = this.http.get<GeoFeatureCollection>('https://3000-ff928705-26b4-41f1-956a-9e82ec83b595.ws-eu01.gitpod.io/');
+    this.obsGeoData = this.http.get<GeoFeatureCollection>(`${this.serverUrl}/`);
     this.obsGeoData.subscribe(this.prepareData);
   }
 
@@ -81,29 +117,38 @@ export class AppComponent implements OnInit {
   {
     console.log(circleCenter); //Voglio ottenere solo i valori entro questo cerchio
     console.log(this.radius);
-
-    this.circleLat = circleCenter.coords.lat; //Aggiorno le coordinate del cerchio
-    this.circleLng = circleCenter.coords.lng; //Aggiorno le coordinate del cerchio
-
-    //Non conosco ancora le prestazioni del DB, non voglio fare ricerche troppo onerose
+    this.circleLat = circleCenter.coords.lat;
+    this.circleLng = circleCenter.coords.lng;
     if(this.radius > this.maxRadius)
     {
       console.log("area selezionata troppo vasta sarà reimpostata a maxRadius");
-       this.radius = this.maxRadius;
+      this.radius = this.maxRadius;
     }
-    console.log ("raggio in gradi " + (this.radius * 0.00001)/1.1132)
-
-    //Voglio spedire al server una richiesta che mi ritorni tutte le abitazioni all'interno del cerchio
 
     let raggioInGradi = (this.radius * 0.00001)/1.1132;
-    //Posso riusare lo stesso observable e lo stesso metodo di gestione del metodo
-    //cambiaFoglio poichè riceverò lo stesso tipo di dati
-    //Divido l'url andando a capo per questioni di leggibilità non perchè sia necessario
-    this.obsCiVett = this.http.get<Ci_vettore[]>(`https://3000-ff928705-26b4-41f1-956a-9e82ec83b595.ws-eu01.gitpod.io/ci_geovettore/
+
+
+    const urlciVett = `${this.serverUrl}/ci_geovettore/
     ${this.circleLat}/
     ${this.circleLng}/
-    ${raggioInGradi}`);
+    ${raggioInGradi}`;
+
+    const urlGeoGeom = `${this.serverUrl}/geogeom/
+    ${this.circleLat}/
+    ${this.circleLng}/
+    ${raggioInGradi}`;
+    //Posso riusare lo stesso observable e lo stesso metodo di gestione del metodo cambiaFoglio
+    //poichè riceverò lo stesso tipo di dati
+    //Divido l'url andando a capo per questioni di leggibilità non perchè sia necessario
+    this.obsCiVett = this.http.get<Ci_vettore[]>(urlciVett);
     this.obsCiVett.subscribe(this.prepareCiVettData);
+
+    this.obsGeoData = this.http.get<GeoFeatureCollection>(urlGeoGeom);
+    this.obsGeoData.subscribe(this.prepareData);
+
+    //console.log ("raggio in gradi " + (this.radius * 0.00001)/1.1132)
+
+    //Voglio spedire al server una richiesta che mi ritorni tutte le abitazioni all'interno del cerchio
 
   }
 
@@ -111,17 +156,27 @@ export class AppComponent implements OnInit {
   cambiaFoglio(foglio) : boolean
   {
     let val = foglio.value; // prendo il valore da un componente html, come foglio che è un input tag
-    this.obsCiVett = this.http.get<Ci_vettore[]>(`https://3000-ff928705-26b4-41f1-956a-9e82ec83b595.ws-eu01.gitpod.io/ci_vettore/${val}`);  //prendo i dati del foglio scelto dal sito dove è hostato il server
+    this.obsCiVett = this.http.get<Ci_vettore[]>(`${this.serverUrl}/ci_vettore/${val}`);  //prendo i dati del foglio scelto dal sito dove è hostato il server
     this.obsCiVett.subscribe(this.prepareCiVettData); //Invio i dati ottenuti all'observable che li aspetta. Questo modo di agire è detto asincrono
     console.log(val);
     return false;
   }
 
+  displayAll() : boolean
+  {
+
+    this.obsCiVett = this.http.get<Ci_vettore[]>(`${this.serverUrl}/all`);
+    this.obsCiVett.subscribe(this.prepareCiVettData);
+    return false;
+  }
+
   styleFunc = (feature) => {
+    console.log(feature)
     return ({
       clickable: false,
-      fillColor: this.fillColor,
-      strokeWeight: 1
+      fillColor: this.avgColorMapGreen(feature.i.media),
+      strokeWeight: 1,
+      fillOpacity : 1  //Fill opacity 1 = opaco (i numeri tra 0 e 1 sono le gradazioni di trasparenza)
     });
   }
 
