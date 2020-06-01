@@ -104,8 +104,6 @@ avgColorMap = (media) =>
   }
 
   ngOnInit() {
-    this.obsGeoData = this.http.get<GeoFeatureCollection>(`${this.serverUrl}/`);
-    this.obsGeoData.subscribe(this.prepareData);
   }
 
   circleRedim(newRadius : number){
